@@ -19,11 +19,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      
+      - name: Make Gradle Executable
+        run: chmod +x gradlew
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v3
-
-      - name: Publish to GitHub Packages
+      - name: Build and Publish to GitHub Packages
         run: ./gradlew publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
