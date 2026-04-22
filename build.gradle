@@ -3,8 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.feather'
-version = '0.1.0-SNAPSHOT'
+group = 'io.github.minecraftfeather'
+version = '1.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -20,7 +20,9 @@ jar {
         attributes(
             'Main-Class': 'com.feather.loader.FeatherLauncher',
             'Premain-Class': 'com.feather.loader.FeatherAgent',
-            'Can-Retransform-Classes': 'true'
+            'Can-Retransform-Classes': 'true',
+            'Implementation-Title': 'FeatherLoader',
+            'Implementation-Version': project.version
         )
     }
 }
@@ -37,11 +39,17 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/YOUR_GITHUB_USER/feather-loader"
+            url = "https://maven.pkg.github.com/MinecraftFeather/feather-loader"
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
