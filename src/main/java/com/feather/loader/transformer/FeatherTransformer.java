@@ -22,7 +22,7 @@ public class FeatherTransformer implements ClassFileTransformer {
     private byte[] modifyBytecode(byte[] bytes) {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
-        classReader.accept(classNod, 0);
+        classReader.accept(classNode, 0);
       
         for (MethodNode method : classNode.methods) {
             for (AbstractInsnNode insn : method.instructions) {
