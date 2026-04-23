@@ -27,3 +27,9 @@ jobs:
         run: ./gradlew publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload Feather JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: feather-loader-jar
+          path: build/libs/*.jar
