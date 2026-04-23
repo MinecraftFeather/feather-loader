@@ -58,6 +58,9 @@ Inside the file, write the full path to your class:
 
 **io.github.minecraftfeather.example.MyExampleMod**
 
+
+---
+
 ## ​🗺️ Mappings Configuration
 
 ​To support obfuscated versions of Minecraft, place a feather_mappings.txt file in your game directory:
@@ -67,6 +70,8 @@ Inside the file, write the full path to your class:
 net.minecraft.client.gui.screens.TitleScreen=ayj
 ```
 
+---
+
 ## 🛠️ Usage (JVM Argument) 
 
 ​To run Minecraft with Feather, add the following to your JVM arguments (e.g., in PojavLauncher):
@@ -75,9 +80,13 @@ net.minecraft.client.gui.screens.TitleScreen=ayj
 -javaagent:feather-loader.jar
 ```
 
+---
+
 ## 📱 Optimization for Mobile
 
 Feather was built with **(2GB RAM)** in mind. It ensures the lowest possible impact on system resources during game initialization.
+
+---
 
 ​© 2026 **MinecraftFeather** Organization
 
