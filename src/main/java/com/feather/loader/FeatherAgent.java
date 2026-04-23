@@ -1,12 +1,14 @@
 package com.feather.loader;
 
-import com.feather.loader.api.FeatherMod;
 import com.feather.loader.transformer.FeatherTransformer;
 import com.feather.loader.mappings.MappingManager;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.util.jar.JarFile;
-import java.util.ServiceLoader;
+import java.util.jar.JarEntry;
+import java.util.Scanner;
+import org.json.JSONObject;
 
 public class FeatherAgent {
 
@@ -25,12 +27,7 @@ public class FeatherAgent {
         File[] files = modsFolder.listFiles((dir, name) -> name.endsWith(".jar"));
         if (files != null) {
             for (File file : files) {
-                try {
-                    inst.appendToSystemClassLoaderSearch(new JarFile(file));
-                    System.out.println("  [Feather] Injected: " + file.getName());
-                } catch (Exception e) {
-                    System.err.println("  [Feather] Failed to inject: " + file.getName());
-                }
+                loadMod(file, inst);
             }
         }
 
@@ -40,18 +37,45 @@ public class FeatherAgent {
         } catch (Exception e) {
             System.err.println("  [Feather] Failed to initialize Transformer");
         }
-        
-        try {
-            ServiceLoader<FeatherMod> loader = ServiceLoader.load(FeatherMod.class);
-            for (FeatherMod mod : loader) {
-                mod.onInitialize();
-                System.out.println("  [Feather] Mod Initialized Successfully");
-            }
-        } catch (Exception e) {
-            System.out.println("  [Feather] Status: No ServiceProvider mods detected.");
-        }
 
         System.out.println("  [Feather] Engine Ready to fly!       ");
         System.out.println("---------------------------------------");
+    }
+
+    private static void loadMod(File file, Instrumentation inst) {
+        try {
+            JarFile jarFile = new JarFile(file);
+            inst.appendToSystemClassLoaderSearch(jarFile);
+            
+            JarEntry entry = jarFile.getJarEntry("feather.mod.json");
+            if (entry != null) {
+                Scanner s = new Scanner(jarFile.getInputStream(entry)).useDelimiter("\\A");
+                String result = s.hasNext() ? s.next() : "";
+                String mainClass = parseJsonField(result, "main");
+                String modName = parseJsonField(result, "name");
+
+                if (mainClass != null) {
+                    Class<?> clazz = Class.forName(mainClass);
+                    Object modInstance = clazz.getDeclaredConstructor().newInstance();
+                    clazz.getMethod("init").invoke(modInstance);
+                    
+                    System.out.println("  [Feather] Mod [" + modName + "] Initialized");
+                }
+            }
+            jarFile.close();
+        } catch (Exception e) {
+            System.err.println("  [Feather] Error loading mod " + file.getName() + ": " + e.getMessage());
+        }
+    }
+    private static String parseJsonField(String json, String field) {
+        try {
+            String key = "\"" + field + "\":";
+            int start = json.indexOf(key) + key.length();
+            int firstQuote = json.indexOf("\"", start) + 1;
+            int lastQuote = json.indexOf("\"", firstQuote);
+            return json.substring(firstQuote, lastQuote);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
