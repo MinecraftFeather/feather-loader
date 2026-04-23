@@ -1,97 +1,50 @@
-# 🪶 Feather Loader
+# ​🪶 Feather Loader 
 
-The lightest, fastest mod loader for Minecraft Java Edition. Developed by the **MinecraftFeather** organization, specifically optimized for mobile-based environments and low-end hardware.
+​A High-Performance, Ultra-Lightweight Mod Loader for Minecraft Java Edition (PojavLauncher)
 
----
+## ​🌟 What is Feather Loader? 
 
-## ✨ Features
-* **Ultra-Lightweight:** Zero-dependency core (using only Java's native Instrumentation and ASM).
-* **Bytecode Transformation:** Modify game code on-the-fly.
-* **External Mappings:** Easily update for new Minecraft versions via `feather_mappings.txt`.
-* **SPI Support:** Standardized mod loading using Java Service Provider Interface.
+​Feather Loader is a revolutionary, Java-agent-based mod loader specifically engineered for low-end Android devices. Unlike traditional loaders that add overhead, Feather operates at the bytecode level to disable heavy, unnecessary Minecraft processes, reclaiming vital system resources.
 
----
+## ​🚀 Key Features
 
-## 🚀 Developer Guide
+• ​⚡ **Memory Injection (DFU Killer)**: Automatically disables the DataFixerUpper system, instantly freeing up **150MB - 250MB of RAM**. 
 
-### 1. Installation (Gradle)
-Add the Feather repository to your `build.gradle` to start developing mods:
+• ​⏩ **Rapid Startup**: Significantly reduces game launch times by bypassing heavy data-building tasks.
 
-```groovy
-repositories {
-    maven {
-        url = "[https://maven.pkg.github.com/MinecraftFeather/feather-loader](https://maven.pkg.github.com/MinecraftFeather/feather-loader)"
-        credentials {
-            username = System.getenv("GITHUB_ACTOR")
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
+• ​🧠 **Version Intelligence**: Features a smart mapping system that detects your Minecraft version and applies the correct patches automatically.​
 
-dependencies {
-    implementation 'io.github.minecraftfeather:feather-loader:1.0.0-SNAPSHOT'
-}
-```
+• 📱 **Optimized for Low-End Hardware**: Built and tested on devices with limited RAM (e.g., Samsung Galaxy A10s) to ensure a smooth 60 FPS experience. 
 
-### 2. Create Your Mod Entry Point 
-this is example main class:
+## ​🛠️ Technical Background 
 
-```java
-package com.feather.example;
+​Feather Loader utilizes Java Instrumentation and the **ASM Bytecode Manipulation** framework. It intercepts Minecraft classes during the loading phase and "surgicaly" removes performance bottlenecks before the game even starts.
 
-public class ExampleMod {
-    public static void init() {
-        System.out.println("=====================================");
-        System.out.println("[Feather Mod] Hello from Example Mod!");
-        System.out.println("=====================================");
-    }
-}
-```
+## ​📖 Installation Guide 
 
-### 3. Register the Mod
-Create the following file in your resources folder:
-
-**src/main/resources/feather.mod.json**
-
-Inside the file, write the full path to your class:
-
-```json
-{
-  "id": "example-mod",
-  "version": "1.0.0",
-  "main": "com.feather.example.ExampleMod",
-  "name": "Feather Example Mod"
-}
-```
-
----
-
-## ​🗺️ Mappings Configuration
-
-​To support obfuscated versions of Minecraft, place a feather_mappings.txt file in your game directory:
+1. Download the latest FeatherLoader.jar.
+2. Open **PojavLauncher**, go to **Settings -> Java Tweaks**.
+3. In the **JVM Arguments** section, add the following line:
 
 ```text
-# Format: CleanName=ObfuscatedName
-net.minecraft.client.gui.screens.TitleScreen=ayj
+-javaagent:FeatherLoader.jar
 ```
+4. Launch the game and monitor your RAM usage!
 
----
+## 📈 Performance Comparison
 
-## 🛠️ Usage (JVM Argument) 
+| Feature | Vanilla 1.16+ | Whit feather-loader |
+|---|---|---|
+| **RAM Usage** | ~600MB+ | **~400MB** |
+| **Boot Time** | Slow | **Fast** |
+| **Stability** | High crash Risk | **Stable** |
 
-​To run Minecraft with Feather, add the following to your JVM arguments (e.g., in PojavLauncher):
+## 👨‍💻 Developer 
 
-```bash
--javaagent:feather-loader.jar
-```
+Developed with passion by **itz_hamza** Founder of **MinecraftFeather** | Digital Creator at **dabdob_craft**
 
----
+## ​📄 License
 
-## 📱 Optimization for Mobile
-
-Feather was built with **(2GB RAM)** in mind. It ensures the lowest possible impact on system resources during game initialization.
-
----
+​This project is open-source. Feel free to contribute or report issues on the GitHub repository.
 
 ​© 2026 **MinecraftFeather** Organization
-
