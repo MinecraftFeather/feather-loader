@@ -23,6 +23,10 @@ public class FeatherTransformer implements ClassFileTransformer {
         if (className.equals("net/minecraft/world/chunk/ChunkStatus") || className.equals("net/minecraft/class_2806")) {
             return optimizeWorldGen(classfileBuffer);
         }
+
+        if (className.equals("net/minecraft/world/chunk/light/ChunkLightProvider") || className.equals("net/minecraft/class_3558")) {
+            return optimizeLighting(classfileBuffer);
+        }
         
         return classfileBuffer;
     }
@@ -60,6 +64,23 @@ public class FeatherTransformer implements ClassFileTransformer {
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("isAtLeast") || method.name.equals("method_12154")) {
                 System.out.println("[Feather Loader] Optimizing World Gen Logic...");
+            }
+        }
+
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        classNode.accept(classWriter);
+        return classWriter.toByteArray();
+    }
+
+    private byte[] optimizeLighting(byte[] bytes) {
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(bytes);
+        classReader.accept(classNode, 0);
+
+        for (MethodNode method : classNode.methods) {
+            if (method.name.equals("doLightUpdates") || method.name.equals("method_15513")) {
+                method.instructions.clear();
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
             }
         }
 
