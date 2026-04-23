@@ -54,7 +54,7 @@ public class FeatherAgent {
                 String modName = parseJsonField(result, "name");
 
                 if (mainClass != null) {
-                    Class<?> clazz = Class.forName(mainClass);
+                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(mainClass);
                     Object modInstance = clazz.getDeclaredConstructor().newInstance();
                     clazz.getMethod("init").invoke(modInstance);
                     
