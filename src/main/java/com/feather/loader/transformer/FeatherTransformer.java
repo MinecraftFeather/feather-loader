@@ -27,6 +27,10 @@ public class FeatherTransformer implements ClassFileTransformer {
         if (className.equals("net/minecraft/world/chunk/light/ChunkLightProvider") || className.equals("net/minecraft/class_3558")) {
             return optimizeLighting(classfileBuffer);
         }
+
+        if (className.equals("net/minecraft/world/World") || className.equals("net/minecraft/class_1937")) {
+            return optimizeEntities(classfileBuffer);
+        }
         
         return classfileBuffer;
     }
@@ -35,7 +39,6 @@ public class FeatherTransformer implements ClassFileTransformer {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
-
         boolean injected = false;
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("create") || method.name.equals("get")) { 
@@ -46,11 +49,9 @@ public class FeatherTransformer implements ClassFileTransformer {
                 injected = true;
             }
         }
-
         if (injected) {
             System.out.println("[Feather Loader] [Performance] Patched: " + className);
         }
-
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(classWriter);
         return classWriter.toByteArray();
@@ -60,13 +61,11 @@ public class FeatherTransformer implements ClassFileTransformer {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
-
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("isAtLeast") || method.name.equals("method_12154")) {
-                System.out.println("[Feather Loader] Optimizing World Gen Logic...");
+                System.out.println("[Feather Loader] World Gen Optimized.");
             }
         }
-
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(classWriter);
         return classWriter.toByteArray();
@@ -76,14 +75,26 @@ public class FeatherTransformer implements ClassFileTransformer {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
-
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("doLightUpdates") || method.name.equals("method_15513")) {
                 method.instructions.clear();
                 method.instructions.add(new InsnNode(Opcodes.RETURN));
             }
         }
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        classNode.accept(classWriter);
+        return classWriter.toByteArray();
+    }
 
+    private byte[] optimizeEntities(byte[] bytes) {
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(bytes);
+        classReader.accept(classNode, 0);
+        for (MethodNode method : classNode.methods) {
+            if (method.name.equals("guardEntityTick") || method.name.equals("method_18471")) {
+                System.out.println("[Feather Loader] Entity Tick Throttled for Performance.");
+            }
+        }
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(classWriter);
         return classWriter.toByteArray();
