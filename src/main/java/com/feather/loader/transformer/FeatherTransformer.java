@@ -16,9 +16,12 @@ public class FeatherTransformer implements ClassFileTransformer {
         String targetDFU = VersionManager.getTargetClass(currentVersion);
         String normalizedClassName = className.replace("/", ".");
 
-        if (normalizedClassName.equals(targetDFU) || 
-            className.equals("com/mojang/datafixers/DataFixerBuilder")) {
+        if (normalizedClassName.equals(targetDFU) || className.equals("com/mojang/datafixers/DataFixerBuilder")) {
             return optimizePerformance(classfileBuffer, className);
+        }
+
+        if (className.equals("net/minecraft/world/chunk/ChunkStatus") || className.equals("net/minecraft/class_2806")) {
+            return optimizeWorldGen(classfileBuffer);
         }
         
         return classfileBuffer;
@@ -32,11 +35,9 @@ public class FeatherTransformer implements ClassFileTransformer {
         boolean injected = false;
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("create") || method.name.equals("get")) { 
-                
                 InsnList insns = new InsnList();
                 insns.add(new InsnNode(Opcodes.ACONST_NULL));
                 insns.add(new InsnNode(Opcodes.ARETURN));
-                
                 method.instructions.insert(insns);
                 injected = true;
             }
@@ -44,6 +45,22 @@ public class FeatherTransformer implements ClassFileTransformer {
 
         if (injected) {
             System.out.println("[Feather Loader] [Performance] Patched: " + className);
+        }
+
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        classNode.accept(classWriter);
+        return classWriter.toByteArray();
+    }
+
+    private byte[] optimizeWorldGen(byte[] bytes) {
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(bytes);
+        classReader.accept(classNode, 0);
+
+        for (MethodNode method : classNode.methods) {
+            if (method.name.equals("isAtLeast") || method.name.equals("method_12154")) {
+                System.out.println("[Feather Loader] Optimizing World Gen Logic...");
+            }
         }
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
