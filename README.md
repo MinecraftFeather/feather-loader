@@ -34,17 +34,16 @@ dependencies {
 ```
 
 ### 2. Create Your Mod Entry Point 
-Implement the FeatherMod interface in your main class:
+this is example main class:
 
 ```java
-package io.github.minecraftfeather.example;
+package com.feather.example;
 
-import com.feather.loader.api.FeatherMod;
-
-public class MyExampleMod implements FeatherMod {
-    @Override
-    public void onInitialize() {
-        System.out.println("[Feather] Hello from my custom mod!");
+public class ExampleMod {
+    public static void init() {
+        System.out.println("=====================================");
+        System.out.println("[Feather Mod] Hello from Example Mod!");
+        System.out.println("=====================================");
     }
 }
 ```
@@ -52,12 +51,18 @@ public class MyExampleMod implements FeatherMod {
 ### 3. Register the Mod
 Create the following file in your resources folder:
 
-**src/main/resources/META-INF/services/com.feather.loader.api.FeatherMod**
+**src/main/resources/feather.mod.json**
 
 Inside the file, write the full path to your class:
 
-**io.github.minecraftfeather.example.MyExampleMod**
-
+```json
+{
+  "id": "example-mod",
+  "version": "1.0.0",
+  "main": "com.feather.example.ExampleMod",
+  "name": "Feather Example Mod"
+}
+```
 
 ---
 
