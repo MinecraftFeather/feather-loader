@@ -16,7 +16,7 @@ public class FeatherTransformer implements ClassFileTransformer {
         String targetDFU = VersionManager.getTargetClass(currentVersion);
         String normalizedClassName = className.replace("/", ".");
 
-        if (normalizedClassName.equals(targetDFU) || className.equals("com/mojang/datafixers/DataFixerBuilder")) {
+        if (normalizedClassName.equals(targetDFU) || className.equals("com/mojang/datafixers/DataFixerBuilder") || className.contains("DataFixers")) {
             return optimizePerformance(classfileBuffer, className);
         }
 
@@ -41,16 +41,19 @@ public class FeatherTransformer implements ClassFileTransformer {
         classReader.accept(classNode, 0);
         boolean injected = false;
         for (MethodNode method : classNode.methods) {
-            if (method.name.equals("create") || method.name.equals("get")) { 
-                InsnList insns = new InsnList();
-                insns.add(new InsnNode(Opcodes.ACONST_NULL));
-                insns.add(new InsnNode(Opcodes.ARETURN));
-                method.instructions.insert(insns);
+            if (method.name.equals("create") || method.name.equals("get") || method.name.equals("addTasks")) { 
+                method.instructions.clear();
+                if (method.desc.endsWith("V")) {
+                    method.instructions.add(new InsnNode(Opcodes.RETURN));
+                } else {
+                    method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+                    method.instructions.add(new InsnNode(Opcodes.ARETURN));
+                }
                 injected = true;
             }
         }
         if (injected) {
-            System.out.println("[Feather Loader] [Performance] Patched: " + className);
+            System.out.println("[Feather] Critical Patch: " + className);
         }
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(classWriter);
@@ -63,7 +66,9 @@ public class FeatherTransformer implements ClassFileTransformer {
         classReader.accept(classNode, 0);
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("isAtLeast") || method.name.equals("method_12154")) {
-                System.out.println("[Feather Loader] World Gen Optimized.");
+                method.instructions.clear();
+                method.instructions.add(new InsnNode(Opcodes.ICONST_1));
+                method.instructions.add(new InsnNode(Opcodes.IRETURN));
             }
         }
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
@@ -92,7 +97,8 @@ public class FeatherTransformer implements ClassFileTransformer {
         classReader.accept(classNode, 0);
         for (MethodNode method : classNode.methods) {
             if (method.name.equals("guardEntityTick") || method.name.equals("method_18471")) {
-                System.out.println("[Feather Loader] Entity Tick Throttled for Performance.");
+                method.instructions.clear();
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
             }
         }
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
