@@ -10,33 +10,33 @@ public class FeatherTransformer implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (className.equals("net/minecraft/client/gui/Font") || className.equals("net/minecraft/class_327")) {
-            return injectArabicSupport(classfileBuffer);
+        if (className.equals("net/minecraft/util/datafixers/DataFixers") || 
+            className.equals("com/mojang/datafixers/DataFixerBuilder")) {
+            return optimizePerformance(classfileBuffer, className);
         }
+        
         return classfileBuffer;
     }
 
-    private byte[] injectArabicSupport(byte[] bytes) {
+    private byte[] optimizePerformance(byte[] bytes, String className) {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
 
+        boolean injected = false;
         for (MethodNode method : classNode.methods) {
-            if (method.name.equals("draw") || method.name.equals("method_30744")) { 
+            if (method.name.equals("build") || method.name.equals("create") || method.name.equals("get")) { 
                 
-                InsnList insns = new InsnList();
-                insns.add(new VarInsnNode(Opcodes.ALOAD, 1)); 
-                insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, 
-                        "com/feather/loader/utils/ArabicUtils", 
-                        "fixArabic", 
-                        "(Ljava/lang/String;)Ljava/lang/String;", 
-                        false));
+                method.instructions.clear();
+                method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+                method.instructions.add(new InsnNode(Opcodes.ARETURN));
                 
-                insns.add(new VarInsnNode(Opcodes.ASTORE, 1));
-
-                method.instructions.insert(insns);
-                System.out.println("[Feather] Successfully injected Arabic Fix into: " + method.name);
+                injected = true;
             }
+        }
+
+        if (injected) {
+            System.out.println("[Feather Loader] Performance Boost: Disabled DFU in " + className);
         }
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
