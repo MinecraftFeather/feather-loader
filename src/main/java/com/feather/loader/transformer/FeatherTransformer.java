@@ -2,6 +2,7 @@ package com.feather.loader.transformer;
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
+import com.feather.loader.utils.VersionManager;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -10,7 +11,11 @@ public class FeatherTransformer implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (className.equals("net/minecraft/util/datafixers/DataFixers") || 
+        String currentVersion = VersionManager.getMinecraftVersion();
+        String targetDFU = VersionManager.getTargetClass(currentVersion);
+        String normalizedClassName = className.replace("/", ".");
+
+        if (normalizedClassName.equals(targetDFU) || 
             className.equals("com/mojang/datafixers/DataFixerBuilder")) {
             return optimizePerformance(classfileBuffer, className);
         }
@@ -36,7 +41,7 @@ public class FeatherTransformer implements ClassFileTransformer {
         }
 
         if (injected) {
-            System.out.println("[Feather Loader] Performance Boost: Disabled DFU in " + className);
+            System.out.println("[Feather Loader] [Performance] Optimization applied to: " + className);
         }
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
