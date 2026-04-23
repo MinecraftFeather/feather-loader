@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' 
 }
 
 group = 'io.github.minecraftfeather'
@@ -15,7 +16,8 @@ dependencies {
     implementation 'org.ow2.asm:asm-tree:9.6'
 }
 
-jar {
+shadowJar {
+    archiveClassifier.set('')
     manifest {
         attributes(
             'Manifest-Version': '1.0',
@@ -29,7 +31,7 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            artifact shadowJar
             groupId = group
             artifactId = 'feather-loader'
             version = version
@@ -48,6 +50,9 @@ publishing {
 }
 
 java {
+    [span_3](start_span)
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+
+build.dependsOn shadowJar
