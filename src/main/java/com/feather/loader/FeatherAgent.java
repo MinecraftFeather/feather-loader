@@ -8,7 +8,6 @@ import java.lang.instrument.Instrumentation;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.Scanner;
-import org.json.JSONObject;
 
 public class FeatherAgent {
 
