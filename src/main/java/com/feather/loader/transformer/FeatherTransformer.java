@@ -11,6 +11,7 @@ public class FeatherTransformer implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+        
         String currentVersion = VersionManager.getMinecraftVersion();
         String targetDFU = VersionManager.getTargetClass(currentVersion);
         String normalizedClassName = className.replace("/", ".");
@@ -30,21 +31,22 @@ public class FeatherTransformer implements ClassFileTransformer {
 
         boolean injected = false;
         for (MethodNode method : classNode.methods) {
-            if (method.name.equals("build") || method.name.equals("create") || method.name.equals("get")) { 
+            if (method.name.equals("create") || method.name.equals("get")) { 
                 
-                method.instructions.clear();
-                method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
-                method.instructions.add(new InsnNode(Opcodes.ARETURN));
+                InsnList insns = new InsnList();
+                insns.add(new InsnNode(Opcodes.ACONST_NULL));
+                insns.add(new InsnNode(Opcodes.ARETURN));
                 
+                method.instructions.insert(insns);
                 injected = true;
             }
         }
 
         if (injected) {
-            System.out.println("[Feather Loader] [Performance] Optimization applied to: " + className);
+            System.out.println("[Feather Loader] [Performance] Patched: " + className);
         }
 
-        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(classWriter);
         return classWriter.toByteArray();
     }
