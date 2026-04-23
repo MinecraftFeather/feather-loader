@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.github.minecraftfeather'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0-BETA'
 
 repositories {
     mavenCentral()
@@ -24,7 +24,9 @@ shadowJar {
             'Manifest-Version': '1.0',
             'Premain-Class': 'com.feather.loader.FeatherAgent',
             'Can-Retransform-Classes': 'true',
-            'Can-Redefine-Classes': 'true'
+            'Can-Redefine-Classes': 'true',
+            'Implementation-Title': 'FeatherLoader',
+            'Implementation-Version': project.version
         )
     }
 }
