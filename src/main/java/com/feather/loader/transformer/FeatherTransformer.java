@@ -1,5 +1,6 @@
 package com.feather.loader.transformer;
 
+import com.feather.loader.mappings.MappingManager;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import org.objectweb.asm.ClassReader;
@@ -11,8 +12,10 @@ public class FeatherTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         
-        if (className.equals("net/minecraft/client/gui/screens/TitleScreen")) {
-            System.out.println("[Feather] Modifying TitleScreen...");
+        String target = MappingManager.getObfuscatedName("net.minecraft.client.gui.screens.TitleScreen");
+        
+        if (className != null && className.equals(target)) {
+            System.out.println("[Feather] Modifying TitleScreen (" + className + ")...");
             return modifyBytecode(classfileBuffer);
         }
         
@@ -27,7 +30,7 @@ public class FeatherTransformer implements ClassFileTransformer {
         for (MethodNode method : classNode.methods) {
             for (AbstractInsnNode insn : method.instructions) {
                 if (insn instanceof LdcInsnNode ldc) {
-                    if (ldc.cst.equals("Minecraft")) {
+                    if (ldc.cst instanceof String text && text.equals("Minecraft")) {
                         ldc.cst = "Minecraft (Feather)";
                     }
                 }
