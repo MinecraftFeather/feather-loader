@@ -1,39 +1,41 @@
 package com.feather.loader.transformer;
 
-import com.feather.loader.mappings.MappingManager;
+import org.objectweb.asm.*;
+import org.objectweb.asm.tree.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.*;
 
 public class FeatherTransformer implements ClassFileTransformer {
+
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        
-        String target = MappingManager.getObfuscatedName("net.minecraft.client.gui.screens.TitleScreen");
-        
-        if (className != null && className.equals(target)) {
-            System.out.println("[Feather] Modifying TitleScreen (" + className + ")...");
-            return modifyBytecode(classfileBuffer);
+        if (className.equals("net/minecraft/client/gui/Font") || className.equals("net/minecraft/class_327")) {
+            return injectArabicSupport(classfileBuffer);
         }
-        
         return classfileBuffer;
     }
 
-    private byte[] modifyBytecode(byte[] bytes) {
+    private byte[] injectArabicSupport(byte[] bytes) {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
-      
+
         for (MethodNode method : classNode.methods) {
-            for (AbstractInsnNode insn : method.instructions) {
-                if (insn instanceof LdcInsnNode ldc) {
-                    if (ldc.cst instanceof String text && text.equals("Minecraft")) {
-                        ldc.cst = "Minecraft (Feather)";
-                    }
-                }
+            if (method.name.equals("draw") || method.name.equals("method_30744")) { 
+                
+                InsnList insns = new InsnList();
+                insns.add(new VarInsnNode(Opcodes.ALOAD, 1)); 
+                insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, 
+                        "com/feather/loader/utils/ArabicUtils", 
+                        "fixArabic", 
+                        "(Ljava/lang/String;)Ljava/lang/String;", 
+                        false));
+                
+                insns.add(new VarInsnNode(Opcodes.ASTORE, 1));
+
+                method.instructions.insert(insns);
+                System.out.println("[Feather] Successfully injected Arabic Fix into: " + method.name);
             }
         }
 
