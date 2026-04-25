@@ -15,6 +15,7 @@ public class FeatherAgent {
         System.out.println("  [Feather] Mappings Loaded");
 
         ModLoader.loadMods(inst);
+        com.feather.loader.api.FeatherEvents.postInit();
 
         try {
             inst.addTransformer(new FeatherTransformer());
