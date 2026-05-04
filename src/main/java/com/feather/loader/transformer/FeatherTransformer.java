@@ -20,24 +20,23 @@ public class FeatherTransformer implements java.lang.instrument.ClassFileTransfo
 
         for (MethodNode method : node.methods) {
             if ((method.name.equals("render") || method.name.equals("a")) && 
-                (method.desc.contains("MatrixStack") || method.desc.contains("Lp;"))) {
-                
+            (method.desc.contains("MatrixStack") || method.desc.contains("Lp;"))) {
+        
+                System.out.println("[Feather] Target render method found: " + method.name + method.desc);
+        
                 InsnList insns = method.instructions;
                 for (AbstractInsnNode insn : insns) {
                     if (insn.getOpcode() == Opcodes.RETURN) {
                         InsnList inject = new InsnList();
                         inject.add(new VarInsnNode(Opcodes.ALOAD, 1)); 
                         inject.add(new LdcInsnNode("feather loader 1.0.0-BETA")); 
-                        inject.add(new InsnNode(Opcodes.ICONST_0));
-                        inject.add(new InsnNode(Opcodes.ICONST_0));
-                        inject.add(new InsnNode(Opcodes.ICONST_M1));
-                        inject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, 
-                            "com/feather/loader/api/RenderUtils", 
-                            "drawText", 
-                            "(Ljava/lang/Object;Ljava/lang/String;III)V", 
-                            false));
-                        
+                        inject.add(new InsnNode(Opcodes.ICONST_0)); 
+                        inject.add(new InsnNode(Opcodes.ICONST_0)); 
+                        inject.add(new InsnNode(Opcodes.ICONST_M1)); 
+                        inject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/feather/loader/api/RenderUtils", "drawText", "(Ljava/lang/Object;Ljava/lang/String;III)V", false));
+                
                         insns.insertBefore(insn, inject);
+                        System.out.println("[Feather] Successfully injected code into TitleScreen!");
                     }
                 }
             }
